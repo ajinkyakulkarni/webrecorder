@@ -28,6 +28,10 @@
 
 </script>
 
+<script type="text/javascript">
+    var recordings = {{ get_recs_for_coll() }};
+</script>
+
 {% assets "main-css" %}
 <link href="{{ ASSET_URL }}" rel="stylesheet" />
 {% endassets %}

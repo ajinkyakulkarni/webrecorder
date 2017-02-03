@@ -194,47 +194,69 @@ class AppController(BaseController):
 
         @contextfunction
         def get_share_url(context):
-            prefix = context.get('top_prefix')
-            wbreq = context.get('wbrequest')
-            ts = context.get('ts', '')
             url = context.get('url')
             br = context.get('browser', '')
+            user = context.get('user')
+            coll = context.get('coll')
+            host = self.app_host + ('' if self.app_host.endswith('/') else '/')
+            ts = ''
 
             if br != '':
                 br = '$br:'+br
 
-            # get timestamp from context or wbreq (depending if cbrowser)
-            ts = wbreq['wb_url'].timestamp if wbreq else ts
+            if context.get('curr_mode', '') in ('record'):
+                ts = context.get('timestamp', '')
+            else:
+                wbreq = context.get('wbrequest')
+                ts = context.get('ts', '')
+                # get timestamp from context or wbreq (depending if cbrowser)
+                ts = wbreq['wb_url'].timestamp if wbreq else ts
 
-            return '{host}{ts}{browser}/{url}'.format(host=prefix,
-                                                      browser=br,
-                                                      ts=ts,
-                                                      url=url)
+            return 'https://{host}{user}/{coll}/{ts}{browser}/{url}'.format(
+                host=host,
+                user=user,
+                coll=coll,
+                ts=ts,
+                browser=br,
+                url=url
+            )
 
         @contextfunction
         def get_embed_url(context):
-            prefix = context.get('top_prefix')
-            wbreq = context.get('wbrequest')
-            ts = context.get('ts', '')
+            host = self.app_host + ('' if self.app_host.endswith('/') else '/')
             url = context.get('url')
             br = context.get('browser', '')
+            user = context.get('user')
+            coll = context.get('coll')
+            ts = ''
 
             if br != '':
                 br = '$br:'+br
 
-            # get timestamp from context or wbreq (depending if cbrowser)
-            ts = wbreq['wb_url'].timestamp if wbreq else ts
+            if context.get('curr_mode', '') in ('record'):
+                ts = context.get('timestamp', '')
+            else:
+                wbreq = context.get('wbrequest')
+                ts = context.get('ts', '')
 
-            # add embed to url prefix
-            url_parts = prefix.split('/')
-            url_parts.insert(3, '_embed')
-            prefix = '/'.join(url_parts)
+                # get timestamp from context or wbreq (depending if cbrowser)
+                ts = wbreq['wb_url'].timestamp if wbreq else ts
 
-            return '{prefix}{ts}/{url}'.format(
-                prefix=prefix,
+            return 'https://{host}_embed/{user}/{coll}/{ts}{browser}/{url}'.format(
+                host=host,
+                user=user,
+                coll=coll,
                 ts=ts,
+                browser=br,
                 url=url
             )
+
+        @contextfunction
+        def get_recs_for_coll(context):
+            user = context.get('user')
+            coll = context.get('coll')
+            return [{'ts': r['timestamp'], 'url': r['url'], 'br': r.get('browser', '')}
+                    for r in self.manager.list_coll_pages(user, coll)]
 
         @contextfunction
         def is_out_of_space(context):
@@ -268,6 +290,7 @@ class AppController(BaseController):
         jinja_env.globals['get_body_class'] = get_body_class
         jinja_env.globals['get_share_url'] = get_share_url
         jinja_env.globals['get_embed_url'] = get_embed_url
+        jinja_env.globals['get_recs_for_coll'] = get_recs_for_coll
         jinja_env.globals['get_app_host'] = get_app_host
         jinja_env.globals['is_out_of_space'] = is_out_of_space
         jinja_env.globals['get_browsers'] = get_browsers

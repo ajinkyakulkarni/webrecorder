@@ -10,6 +10,8 @@ $(function() {
     SizeProgressBar.start();
     Snapshot.start();
     ShareWidget.start();
+    ModeSelector.start();
+    PagingInterface.start();
 });
 
 function setUrl(url) {
@@ -26,6 +28,10 @@ function setTitle(status_msg, url, title) {
         title = url;
     }
     document.title = title + " (" + status_msg + ")";
+}
+
+function setTimestamp(ts) {
+    wbinfo.timestamp = ts;
 }
 
 function cbrowserMod(sep, ts) {
@@ -266,8 +272,158 @@ var EventHandlers = (function() {
     }
 })();
 
+var ModeSelector = (function (){
 
-var ShareWidget = (function (){
+    function start() {
+        $('.wr-modes').on('click', '.wr-mode:not(.active)', function () {
+            var obj = $(this);
+
+            switch(obj.data('mode')) {
+                case 'new':
+                    window.location.href = '/'+user+'/'+coll+'/$new';
+                    break;
+                case 'record':
+                    var url = getUrl();
+                    var rec = getStorage("__wr_currRec") || DEFAULT_RECORDING_SESSION_NAME;
+                    RouteTo.newRecording(coll, rec, url);
+                    break;
+                case 'replay':
+                    var url = getUrl();
+                    RouteTo.replayRecording(user, coll, cbrowserMod('', wbinfo.timestamp), url);
+                    break;
+                case 'patch':
+                    var url = getUrl();
+                    RouteTo.newPatch(coll, url, window, wbinfo.timestamp);
+                    break;
+                case 'snapshot':
+                    Snapshot.queueSnapshot();
+                    break;
+            }
+        });
+    }
+
+    return {
+        'start': start
+    };
+})();
+
+var PagingInterface = (function () {
+    var pgDsp;
+    var idx;
+    var iframe;
+    var nextBtn; var prevBtn;
+    var timestamp;
+    var li;
+
+    function updateCounter(cursor) {
+        if(typeof cursor === 'undefined') cursor = (recordings.length-1);
+
+        var value = '('+(cursor+1)+' of '+recordings.length+')';
+        pgDsp.attr('size', value.length);
+        pgDsp.val(value);
+    }
+
+    function updateTimestamp(ts) {
+        timestamp.html(TimesAndSizesFormatter.ts_to_date(ts)+"<span class='glyphicon glyphicon-triangle-bottom' />");
+    }
+
+    function next() {
+        if(idx + 1 < recordings.length)
+            update(recordings[++idx]);
+    }
+
+    function previous() {
+        if(idx - 1 >= 0)
+            update(recordings[--idx]);
+    }
+
+    function start() {
+        if(!$('.linklist').length)
+            return;
+
+        pgDsp = $('#page-display');
+        iframe = document.getElementById('replay_iframe');
+        nextBtn = $('.btn-next');
+        prevBtn = $('.btn-prev');
+        timestamp = $('.linklist > .replay-date');
+        var linklist = $('.linklist');
+        li = linklist.find('li');
+
+        nextBtn.on('click', next);
+        prevBtn.on('click', previous);
+
+        // find current index
+        var i = 0;
+        for(var record of recordings) {
+            if(record.ts == wbinfo.timestamp && record.url == wbinfo.url) {
+                updateCounter(i);
+                idx = i;
+                break;
+            }
+            i++;
+        }
+
+        updateTimestamp(wbinfo.timestamp);
+        timestamp.on('click', function (evt) {
+            evt.stopPropagation();
+            linklist.toggleClass('open');
+        });
+
+        // set linklist ones TODO: this might be slow and uncessary
+        linklist.find('> .dropdown-menu .replay-date').each(function () {
+            var obj = $(this);
+
+            obj.html(TimesAndSizesFormatter.ts_to_date(String(obj.data('date'))));
+        });
+
+        linklist.find('> .dropdown-menu').on('click', 'li:not(.active)', function () {
+            idx = $(this).index();
+            update(recordings[idx]);
+            linklist.removeClass('open');
+        })
+
+
+        // set arrow buttons
+        update();
+    }
+
+    function update(rec) {
+        /* updates wbinfo, iframe */
+        updateCounter(idx);
+        li.removeClass('active');
+        li.eq(idx).addClass('active');
+
+        // prev, next button presentation
+        if(idx===0)
+            prevBtn.addClass('disabled');
+        else if(idx > 0 && prevBtn.hasClass('disabled'))
+            prevBtn.removeClass('disabled');
+
+        if(idx===recordings.length-1)
+            nextBtn.addClass('disabled');
+        else if(idx < recordings.length - 1 && nextBtn.hasClass('disabled'))
+            nextBtn.removeClass('disabled');
+
+        if(typeof rec !== 'undefined') {
+            if(typeof window.cnt_browser !== 'undefined' || rec.br) {
+                /* if we're currently in a remote browser view, or the next item is, use fresh navigation to it */
+                window.location.href = '/'+user+'/'+coll+'/'+rec.ts+(typeof rec.br !== 'undefined' && rec.br !== ''?'$br:'+rec.br:'')+'/'+rec.url;
+            } else {
+                // update share widget
+                ShareWidget.updateUrl(rec);
+
+                updateTimestamp(rec.ts);
+                iframe.src = '/'+user+'/'+coll+'/'+rec.ts+'mp_/'+rec.url;
+            }
+        }
+    }
+
+    return {
+        start: start
+    }
+})();
+
+var ShareWidget = (function () {
 
     function checkPublicStatus(user, coll) {
         $.ajax({
@@ -289,30 +445,74 @@ var ShareWidget = (function (){
         });
     }
 
-    function start() {
-        $(".ispublic").bootstrapSwitch();
-        $(".ispublic").on('switchChange.bootstrapSwitch', update);
+    function renderSocialWidgets(url) {
+        // twitter js?
+        if(typeof twttr === 'undefined') return;
 
-        $('.dropdown-menu').on('click', function (evt) {evt.stopPropagation(); });
-        $('.share-container .glyphicon-remove-circle').on('click', function (evt) { $(this).parents('.share-container').toggleClass('open'); });
-
-        var obj = $('.shareables');
-        obj.css('height', obj.height());
-
-        // manage share option visiblity
-        var status = $('.share-container').data('public');
-        if(typeof status !== 'undefined' && !status) {
-            obj.addClass('disabled');
-        } else if(typeof status === 'undefined') {
-            checkPublicStatus(user, coll);
+        // new url or initial?
+        if(typeof url === 'undefined') {
+            url = $('#share-widget').data('url');
         }
 
-        $('.shareables input, .shareables textarea').on('focus', function (){
-            this.setSelectionRange(0, this.value.length);
+        // clear previous widget
+        $('#wr-tw').empty();
+        twttr.ready(function (){
+            twttr.widgets.createShareButton(
+                url,
+                document.getElementById('wr-tw'),
+                {
+                    text: '',
+                    size: 'large',
+                    via: 'webrecorder_io'
+                }
+            );
         });
+
+
+        $('#wr-fb').html('<div class="fb-share-button" data-href="'+url+'" data-layout="button" data-size="large" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php">Share</a></div>')
+
+        if(typeof window.FB === 'undefined') {
+            window.fbAsyncInit = function () {
+                FB.init({
+                    xfbml: false,
+                    version: 'v2.8'
+                });
+            };
+        } else {
+            FB.XFBML.parse();
+        }
     }
 
-    function update(evt, state) {
+    function start() {
+        var shareWidget = $("#share-widget");
+        if(shareWidget.length) {
+            $(".ispublic").bootstrapSwitch().on('switchChange.bootstrapSwitch', updateVisibility);
+
+            // call render on first click
+            $('.dropdown-toggle').one('click', function (){ FB.XFBML.parse(); })
+            $('.dropdown-menu').on('click', function (evt) {evt.stopPropagation(); });
+            $('.share-container .glyphicon-remove-circle').on('click', function (evt) { $(this).parents('.share-container').toggleClass('open'); });
+
+            var obj = $('.shareables');
+            obj.css('height', obj.height());
+
+            // manage share option visiblity
+            var status = $('.share-container').data('public');
+            if(typeof status !== 'undefined' && !status) {
+                obj.addClass('disabled');
+            } else if(typeof status === 'undefined') {
+                checkPublicStatus(user, coll);
+            }
+
+            $('.shareables input, .shareables textarea').on('focus', function (){
+                this.setSelectionRange(0, this.value.length);
+            });
+
+            renderSocialWidgets();
+        }
+    }
+
+    function updateVisibility(evt, state) {
         $.ajax({
             url: '/api/v1/collections/' + coll + '/public?user=' + user,
             method: 'POST',
@@ -327,6 +527,24 @@ var ShareWidget = (function (){
         });
     }
 
+    function updateUrl(rec) {
+        var shareUrl = $('#shareable-url');
+        var shareEmbed = $('#shareable-embed-code');
+
+        var shareVal = shareUrl.val();
+        // replace timestamp if present
+        shareVal = shareVal.replace(/\/\d+\//, '/'+rec.ts+'/');
+        shareVal = shareVal.replace(/\/http.+/, '/' + rec.url)
+        shareUrl.val(shareVal);
+
+        var embedVal = shareEmbed.val();
+        embedVal = embedVal.replace(/\/\d+\//, '/'+rec.ts+'/');
+        embedVal = embedVal.replace(/\/http[^"]*/, '/' + rec.url);
+        shareEmbed.val(embedVal);
+
+        renderSocialWidgets(shareVal);
+    }
+
     function render(state) {
         $('.ispublic').bootstrapSwitch('state', state, true);
         $('.shareables').toggleClass('disabled', !state);
@@ -334,9 +552,7 @@ var ShareWidget = (function (){
 
     return {
         'start': start,
-        'update': update,
-        'render': render,
-        'checkPublicStatus':checkPublicStatus
+        'updateUrl': updateUrl
     };
 })();
 
@@ -424,6 +640,7 @@ var Snapshot = (function() {
     return {start: start,
             uploadStaticSnapshot: uploadStaticSnapshot,
             updateModal: updateModal,
+            queueSnapshot: queueSnapshot
            }
 })();
 
@@ -1163,6 +1380,7 @@ $(function() {
             setUrl(state.url);
 
             attributes.timestamp = state.ts;
+            setTimestamp(state.ts);
             attributes.title = state.title;
 
             var msg = (window.curr_mode == "record") ? "Recording" : "Patching";

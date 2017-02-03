@@ -301,7 +301,7 @@ input.upload-choice {
     color: darkred;
 }
 
-.patching {
+.recording, .patching {
     color: darkred;
 }
 
@@ -352,7 +352,7 @@ input.upload-choice {
     border: 0px;
 }
 
-.form-group-recorder-url .form-control:first-child {
+.containerize:not(.linklist) .form-group-recorder-url .form-control:first-child {
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
 }
@@ -583,8 +583,13 @@ div.filter-label {
     color: #777;
 }
 
+.mode-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .recording-actions {
-    margin-bottom: 8px;
     display: flex;
     justify-content: center;
 }
@@ -864,6 +869,10 @@ div.filter-label {
     margin-left: 20px;
 }
 
+.left-buffer-md {
+    margin-left: 10px;
+}
+
 .left-buffer-sm {
   margin-left: 5px;
 }
@@ -901,10 +910,12 @@ div.filter-label {
     background-image: none;
     background-color: #F8F8F8;
 }
-.containerized .open > .dropdown-toggle, .containerized .dropdown-toggle:focus, .containerized .dropdown-toggle:active, .containerized .dropdown-toggle.active, .containerized .dropdown-toggle:hover {
+.containerized .open > .dropdown-toggle, .containerized .dropdown-toggle:focus, .containerized .dropdown-toggle:active,
+.containerized .dropdown-toggle.active, .containerized .dropdown-toggle:hover {
     background-color: #F7F7F7;
 }
-.share-container .dropdown-menu, .linklist .dropdown-menu, .containerized .dropdown-menu {
+.share-container .dropdown-menu, .linklist .dropdown-menu, .containerized .dropdown-menu,
+.wr-mode-selector .dropdown-menu {
     transition: opacity .2s ease-in-out, transform .2s ease-in-out;
     transform: scale(0.98, 0.98);
 
@@ -922,6 +933,12 @@ div.filter-label {
     top: 100%;
     left: 0;
 }
+.wr-mode-selector.open > .dropdown-menu {
+    opacity: 1;
+    transform: scale(1, 1);
+    top: 100%;
+    left: auto;
+}
 .share-container.open > .dropdown-menu {
     opacity: 1;
     transform: scale(1, 1);
@@ -929,7 +946,7 @@ div.filter-label {
     left: auto;
 }
 .linklist .dropdown-menu, .containerized .dropdown-menu,
-.share-container .dropdown-menu {
+.share-container .dropdown-menu, .wr-mode-selector .dropdown-menu {
     -webkit-box-shadow: 2px 2px 5px rgba(0,0,0,.175);
     box-shadow: 2px 2px 5px rgba(0,0,0,.175);
 }
@@ -976,6 +993,10 @@ div.filter-label {
 .containerized .cnt-browser:nth-child(even) { background-color: #F6F6F6; }
 .containerized .cnt-browser.active { background-color: #eef9ea;}
 .containerized .cnt-browser:not(.disabled):not(.active):hover { background-color: #E3E3E3; }
+
+.containerized .container {
+    width: 60vw;
+}
 
 /**
  * This is a bit of a hack to fit absolute postion dropdowns within the grid system
@@ -1076,6 +1097,16 @@ div.filter-label {
     color: #555;
     cursor: pointer;
 }
+.linklist .main-replay-date {
+    background: linear-gradient(90deg, rgba(255,255,255,0), #F8F8F8 15%, #F8F8F8);
+}
+.linklist:hover .replay-date > span {
+    color: #429EEC;
+}
+.linklist .replay-date > span {
+    transition: color .125s ease-in-out;
+    margin-left: 5px;
+}
 
 .linklist .dropdown-menu {
     width: 100%;
@@ -1085,6 +1116,9 @@ div.filter-label {
     position: relative;
     padding: 10px 5px;
     cursor: pointer;
+}
+.linklist .dropdown-menu li.active {
+    background: #eef9ea;
 }
 .linklist .dropdown-menu li:hover {
     background-color: #eee;
@@ -1098,8 +1132,10 @@ div.filter-label {
     float: none;
     margin-top: -10px;
 }
+
 .linklist .dropdown-menu .url {
     width: 75%;
+    text-align: left;
 }
 
 div.paging-container .home-link {
@@ -1131,7 +1167,7 @@ div.paging-container:hover .home-link {
 .share-container {
     position: relative;
     margin-right: 5px;
-    margin-left: -5px;
+    margin-left: 5px;
 }
 
 .share-container .share-modal {
@@ -1153,11 +1189,9 @@ div.paging-container:hover .home-link {
     display: block;
     clear: both;
 }
-
 .share-modal input {
     margin-bottom: 10px;
 }
-
 .arrow_box:after,
 .arrow_box:before {
     bottom: 100%;
@@ -1170,7 +1204,6 @@ div.paging-container:hover .home-link {
     position: absolute;
     pointer-events: none;
 }
-
 .arrow_box:after {
     border-color: rgba(136, 183, 213, 0);
     border-bottom-color: #FFF;
@@ -1183,8 +1216,6 @@ div.paging-container:hover .home-link {
     border-width: 13px;
     margin-left: -13px;
 }
-
-.fb-share-button { float: left; margin-left: 5px;}
 .shareables {
     /*position: relative;*/
     -webkit-transition: height .22s ease-out;
@@ -1192,6 +1223,7 @@ div.paging-container:hover .home-link {
     overflow: hidden;
 }
 .shareables textarea { overflow: hidden; }
+.shareables textarea, .shareables input { width: 100%; }
 
 .public-switch.hidden {
     display: none;
@@ -1210,6 +1242,79 @@ div.paging-container:hover .home-link {
     cursor: not-allowed;
 }*/
 
-body {
-    min-width: 875px;
+.wr-controls > div{
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+.new-recording {
+    margin-top: 12px;
+}
+.wr-modes {
+    min-width: 400px;
+}
+.wr-modes .wr-mode-icon {
+    font-size: 3.25em;
+}
+.wr-mode-selector ul {
+    margin: 0;
+    padding: 10px 0;
+}
+.wr-mode-selector ul > li {
+    list-style-type: none;
+}
+.wr-mode-selector .row {
+    padding: 10px 0;
+    /*display: table;*/
+}
+.wr-mode-selector li {
+    word-wrap: break-word;
+    white-space: normal;
+}
+.wr-mode-selector li h5 {
+    margin: 0;
+}
+.wr-mode-selector li:first-child {
+/*    display: table-cell;
+    float: none;
+*/    text-align: center;
+    vertical-align: middle;
+}
+
+
+.wr-mode-selector .wr-mode:not(.active) { cursor: pointer; }
+.wr-mode-selector .wr-mode.active { opacity: 0.6; filter: grayscale(100%); }
+.wr-mode-selector .wr-mode:not(.active):hover { background-color: #E3E3E3; }
+
+.sharing-widget svg, .recording-actions .btn svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+.wr-mode-selector .dropdown-toggle .glyphicon {
+    vertical-align: baseline;
+}
+.wr-mode-selector .dropdown-toggle svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+#page-display {
+    width: auto;
+    float: none;
+    display: inline-block;
+    vertical-align: bottom;
+    text-align: center;
+    border-width: 1px 0 1px 1px;
+    border-radius: 0;
+}
+#wr-tw {
+    display: inline-block;
+    width: 76px;
+    height: 37px;
+    float: left;
+}
+#wr-fb {
+    float: left;
+    margin-left: 5px;
 }

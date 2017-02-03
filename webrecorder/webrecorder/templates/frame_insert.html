@@ -56,6 +56,10 @@
         wbinfo.info = {{ info | default('{}') | tojson }};
     </script>
 
+    <script type="text/javascript">
+        var recordings = {{ get_recs_for_coll() }};
+    </script>
+
     {% assets "frame-js" %}
     <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}

@@ -12,7 +12,20 @@
             </div>
         </nav>
 
-        {% include 'recorder.html' %}
+        {% if curr_mode == 'new' %}
+            <div class="container-fluid new-recording">
+                <span class="glyphicon glyphicon-lg glyphicon-modal-window glyphicon-recording-status top-buffer-sm" aria-hidden="true"></span>
+                <span class="recorder-status">Create New Recording</span>
+
+                <label for="rec-title" class="sr-only">Recording title</label>
+                <input name="rec-title" type="text" class="left-buffer form-control input-sm title-inline" placeholder="Recording title" value="{{ rec_title }}" required>
+            </div>
+        {% endif %}
+
+
+        <div class="container-fluid wr-controls">
+            {% include 'recorder.html' %}
+        </div>
 
     </div>
 </header>
