@@ -593,6 +593,9 @@ div.filter-label {
     display: flex;
     justify-content: center;
 }
+.recording-actions .btn {
+    margin-right: 5px;
+}
 
 .table-noborder  {
     border: 0px;
@@ -998,6 +1001,12 @@ div.filter-label {
     width: 60vw;
 }
 
+@media (max-width: 400px) {
+  .nav > li {
+    display: inline-block;
+  }
+}
+
 /**
  * This is a bit of a hack to fit absolute postion dropdowns within the grid system
  * for the homepage.
@@ -1166,8 +1175,6 @@ div.paging-container:hover .home-link {
 */
 .share-container {
     position: relative;
-    margin-right: 5px;
-    margin-left: 5px;
 }
 
 .share-container .share-modal {
@@ -1318,4 +1325,18 @@ div.paging-container:hover .home-link {
 #wr-fb {
     float: left;
     margin-left: 5px;
+}
+
+.wr-tools {
+    transition: height .3s ease-in-out;
+    border-top: solid 1px #ccc;
+    height: 0px;
+    overflow: hidden;
+    background: #F3F3F3;
+
+    display: flex;
+    align-items: center;
+}
+.wr-tools.open {
+    height: 40px;
 }

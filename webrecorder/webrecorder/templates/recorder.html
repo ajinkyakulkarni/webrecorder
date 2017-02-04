@@ -21,8 +21,8 @@
             <div class="input-group containerized">
                 <div class='input-group-btn'>
                     {% if curr_mode == 'replay' or curr_mode == 'replay-coll' %}
-                        <button type="button" class="btn btn-default btn-prev"><span class='glyphicon glyphicon-chevron-left'></span></button>
-                        <input type="text" id='page-display' class='form-control hidden-sm' value="-" />
+                        <button type="button" class="btn btn-default btn-prev hidden-xs"><span class='glyphicon glyphicon-chevron-left'></span></button>
+                        <input type="text" id='page-display' class='form-control hidden-sm hidden-xs' value="-" />
                     {% endif %}
 
                     {% if can_admin() %}
@@ -49,7 +49,7 @@
 
                 {% if curr_mode == 'replay' or curr_mode == 'replay-coll' %}
                     <div class='input-group-btn'>
-                        <button type="button" class="btn btn-default btn-next"><span class='glyphicon glyphicon-chevron-right'></span></button>
+                        <button type="button" class="btn btn-default btn-next hidden-xs"><span class='glyphicon glyphicon-chevron-right'></span></button>
                     </div>
                 {% endif %}
             </div>
@@ -58,13 +58,19 @@
     </div>
 
     <div class="recording-actions text-center col-md-2 col-sm-2">
-        {# needs implementation
         {% if can_admin() %}
-            <button class="btn btn-default">
+            <form class="{{ 'content-action' if curr_mode != 'new' else 'start-recording' }}">
+                <button type="submit" class="btn btn-default">
+                    {{ 'Finish' if curr_mode != 'new' else 'Start' }}
+                </button>
+            </form>
+        {% endif %}
+
+        {% if can_admin() %}
+            <button id="tool-bin" class="btn btn-default">
                 <span class="glyphicon glyphicon-option-vertical" aria-hidden="true"></span>
             </button>
         {% endif %}
-        #}
 
         {% if curr_mode != 'new' %}
             <button class="btn btn-default" title="Doesn't look right?" data-toggle="modal" data-target="#report-modal">
@@ -76,14 +82,6 @@
 
         {% if curr_mode != 'new' %}
             {{ sharing_widget(get_share_url(), get_embed_url(), coll_title, can_admin(), is_public(user, coll), anon=is_anon()) }}
-        {% endif %}
-
-        {% if can_admin() %}
-            <form class="{{ 'content-action' if curr_mode != 'new' else 'start-recording' }}">
-                <button type="submit" class="btn btn-default">
-                    {{ 'Finish' if curr_mode != 'new' else 'Start' }}
-                </button>
-            </form>
         {% endif %}
     </div>
 

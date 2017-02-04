@@ -59,6 +59,10 @@ var EventHandlers = (function() {
             $(this).find('[autofocus]').focus();
         });
 
+        $("#tool-bin").on('click', function () {
+            $('.wr-tools').toggleClass('open');
+        });
+
         // Switch urls -- Url bar submit / enter key
         $('header').on('submit', '.content-form', function(event) {
             event.preventDefault();
