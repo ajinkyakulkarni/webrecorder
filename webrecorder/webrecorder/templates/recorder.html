@@ -4,7 +4,9 @@
 
     {% if can_admin() %}
         <div class="mode-selector col-md-2 col-sm-2">
-            {% include '/mode_dropdown.html' %}
+            {% if curr_mode != 'new' %}
+                {% include '/mode_dropdown.html' %}
+            {% endif %}
 
             {% if curr_mode == 'record' or curr_mode == 'patch' %}
                 <span class="size-counter size-counter-active">
@@ -73,7 +75,7 @@
         {% endif %}
 
         {% if curr_mode != 'new' %}
-            {{ sharing_widget(get_share_url(), get_embed_url(), coll_title, can_admin(), is_public(user, coll)) }}
+            {{ sharing_widget(get_share_url(), get_embed_url(), coll_title, can_admin(), is_public(user, coll), anon=is_anon()) }}
         {% endif %}
 
         {% if can_admin() %}

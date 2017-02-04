@@ -275,7 +275,7 @@ var EventHandlers = (function() {
 var ModeSelector = (function (){
 
     function start() {
-        $('.wr-modes').on('click', '.wr-mode:not(.active)', function () {
+        $('.wr-modes').on('click', '.wr-mode:not(.disabled):not(.active)', function () {
             var obj = $(this);
 
             switch(obj.data('mode')) {
@@ -351,6 +351,13 @@ var PagingInterface = (function () {
 
         nextBtn.on('click', next);
         prevBtn.on('click', previous);
+
+        $(document).on('keyup', function (evt) {
+            if(evt.keyCode === 37)
+                previous();
+            else if(evt.keyCode === 39)
+                next();
+        })
 
         // find current index
         var i = 0;

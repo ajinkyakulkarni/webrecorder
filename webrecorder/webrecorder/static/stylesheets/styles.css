@@ -1281,9 +1281,10 @@ div.paging-container:hover .home-link {
 }
 
 
-.wr-mode-selector .wr-mode:not(.active) { cursor: pointer; }
-.wr-mode-selector .wr-mode.active { opacity: 0.6; filter: grayscale(100%); }
-.wr-mode-selector .wr-mode:not(.active):hover { background-color: #E3E3E3; }
+.wr-mode-selector .wr-mode:not(.disabled):not(.active) { cursor: pointer; }
+.wr-mode-selector .wr-mode.active { background: #eef9ea; }
+.wr-mode-selector .wr-mode.disabled { opacity: 0.6; filter: grayscale(100%); }
+.wr-mode-selector .wr-mode:not(.disabled):not(.active):hover { background-color: #E3E3E3; }
 
 .sharing-widget svg, .recording-actions .btn svg {
     width: 16px;
