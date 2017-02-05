@@ -482,14 +482,7 @@ var ShareWidget = (function () {
 
         $('#wr-fb').html('<div class="fb-share-button" data-href="'+url+'" data-layout="button" data-size="large" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php">Share</a></div>')
 
-        if(typeof window.FB === 'undefined') {
-            window.fbAsyncInit = function () {
-                FB.init({
-                    xfbml: false,
-                    version: 'v2.8'
-                });
-            };
-        } else {
+        if(typeof window.FB !== 'undefined') {
             FB.XFBML.parse();
         }
     }
@@ -519,7 +512,13 @@ var ShareWidget = (function () {
                 this.setSelectionRange(0, this.value.length);
             });
 
-            renderSocialWidgets();
+            $(window).on('load', function (){
+                FB.init({
+                    xfbml: false,
+                    version: 'v2.8'
+                });
+                renderSocialWidgets();
+            });
         }
     }
 
